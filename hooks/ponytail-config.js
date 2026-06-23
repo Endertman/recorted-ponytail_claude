@@ -42,15 +42,6 @@ function isDeactivationCommand(text) {
   return t === 'stop ponytail' || t === 'normal mode';
 }
 
-// ponytail: only embed the plugin install path in a statusline shell command when
-// it's made of ordinary path characters. An allowlist beats escaping every shell's
-// metacharacters; a hostile clone path (quotes, &, $, backtick, ;, etc.) falls back
-// to manual setup instead. Allows : \ / for normal Windows and POSIX paths. Full
-// per-shell escaper only if a real need appears.
-function isShellSafe(p) {
-  return typeof p === 'string' && /^[A-Za-z0-9 _.\-:/\\~]+$/.test(p);
-}
-
 function getConfigDir() {
   if (process.env.XDG_CONFIG_HOME) {
     return path.join(process.env.XDG_CONFIG_HOME, 'ponytail');
@@ -66,11 +57,6 @@ function getConfigDir() {
 
 function getConfigPath() {
   return path.join(getConfigDir(), 'config.json');
-}
-
-function getClaudeDir() {
-  // ponytail: CLAUDE_CONFIG_DIR overrides ~/.claude, matching Claude Code.
-  return process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude');
 }
 
 function getDefaultMode() {
@@ -95,16 +81,6 @@ function getDefaultMode() {
   return DEFAULT_MODE;
 }
 
-function writeDefaultMode(mode) {
-  const normalized = normalizeConfigMode(mode);
-  if (!normalized) return null;
-
-  const configPath = getConfigPath();
-  fs.mkdirSync(path.dirname(configPath), { recursive: true });
-  fs.writeFileSync(configPath, JSON.stringify({ defaultMode: normalized }, null, 2), 'utf8');
-  return normalized;
-}
-
 module.exports = {
   DEFAULT_MODE,
   VALID_MODES,
@@ -112,11 +88,8 @@ module.exports = {
   getDefaultMode,
   getConfigDir,
   getConfigPath,
-  getClaudeDir,
-  isShellSafe,
   normalizeMode,
   normalizeConfigMode,
   normalizePersistedMode,
   isDeactivationCommand,
-  writeDefaultMode,
 };
